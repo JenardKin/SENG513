@@ -1,0 +1,95 @@
+
+ul {
+    list-style-type: none;
+    overflow: hidden;
+    background-color: black;
+    text-align: center; 
+    position: fixed;
+    margin: 0; 
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+li a {
+    float: left;
+    text-decoration: none;
+    padding: 20px 20px 20px 20px;
+    color: white;
+    font-weight: bold;
+    font-family: "Arial Black", Gadget, sans-serif;
+    font-variant: small-caps;
+}
+
+li a.goat {
+    color: gold;
+    font-weight: bold;
+}
+
+li a:hover {
+    background-color: grey;
+}
+
+a.hyperlinks{
+    color:rgb(236, 113, 113);
+}
+
+h1{
+    margin-top: 100;
+    margin-bottom: 25;
+    text-align: center; 
+    font: bold 150px 'Helvetica Neue', sans-serif;
+    letter-spacing: 2px;
+    color: orange;
+
+}
+
+h2{
+    font: normal 50px 'Open Sans', sans-serif;
+    text-align: center; 
+    color: rgb(138, 31, 31);
+    
+}
+
+h3{
+    font: normal 40px 'Helvetica Neue', sans-serif;
+    text-align: center; 
+    color: orange;
+}
+
+hr{
+    border: 5px solid rgb(138, 31, 31);
+    border-radius: 5px;
+}
+
+p{
+    font: bold 15px 'Muli', sans-serif;
+    text-align: justify;
+    line-height: 24px;
+    margin-left: 125;
+    margin-right: 125;
+    text-justify: inter-character; 
+    color: #DFBF84;   
+}
+
+body{
+    background: #072747;            
+    
+}
+div.background{
+    background: #334b63;
+    margin-left: 300;
+    margin-right: 300;
+    padding-bottom: 25;
+
+}
+div.background.top > p{
+    padding-bottom: 25;
+}
+div#inner{
+    background: rgb(86, 87, 126);
+}
+
+b{
+    color:white;
+}
