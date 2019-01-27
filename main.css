@@ -58,7 +58,7 @@ h2{
 }
 
 h3{
-    font: normal 40px 'Helvetica Neue', sans-serif;
+    font: normal 50px 'Helvetica Neue', sans-serif;
     text-align: center; 
     color: orange;
     margin: 0;
@@ -143,7 +143,7 @@ tr{
 }
 
 tr:nth-child(even)>td {
-    background-color: #dddddd;
+    background-color: white;
     color: black;
 
 }
