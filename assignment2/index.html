@@ -6,7 +6,10 @@
     <meta name = 'author' content='Jenard Cabia'>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
     <link rel="stylesheet" type="text/css" href="main.css" />
+    <script src="jquery.min.js"></script>
+
 </head>
 <body style='background-color:salmon;'>
     <div class='wrapper'>
@@ -63,28 +66,40 @@
     var equal = false;
     function callback(button){
 
-        if(equal){
-            document.getElementsByClassName('console')[0].getElementsByTagName('p')[0].innerText = button;
+        var console_string = document.getElementsByClassName('console')[0].getElementsByTagName('p')[0];
+        var main_string = document.getElementsByClassName('main_string')[0].getElementsByTagName('p')[0];
+        
+        if(equal && button != 'C'){
+            main_string.innerText = console_string.innerText;
+            console_string.innerText = button;
             equal = false;
-        }else if(button == 'C'){document.getElementsByClassName('console')[0].getElementsByTagName('p')[0].innerText = '0'; document.getElementsByClassName('main_string')[0].getElementsByTagName('p')[0].innerText = '0';}
+        }
+        else if(button == 'C'){
+            console_string.innerText = '0'; main_string.innerText = '0';
+        }
         else if(button == '='){
-            document.getElementsByClassName('main_string')[0].getElementsByTagName('p')[0].innerText = document.getElementsByClassName('console')[0].getElementsByTagName('p')[0].innerText + button;
+            main_string.innerText = console_string.innerText + button;
             try {
-                document.getElementsByClassName('console')[0].getElementsByTagName('p')[0].innerText = eval(document.getElementsByClassName('console')[0].getElementsByTagName('p')[0].innerText);
+                console_string.innerText = eval(console_string.innerText);
             } catch (e) {
                 if (e instanceof SyntaxError) {
-                    document.getElementsByClassName('console')[0].getElementsByTagName('p')[0].innerText = 0;
+                    console_string.innerText = 0;
                 }
             }
             equal = true;
+            $('.console>p').scrollLeft(0);
+            return;
         }
         else{
-            if(document.getElementsByClassName('console')[0].getElementsByTagName('p')[0].innerText != '0')
-                document.getElementsByClassName('console')[0].getElementsByTagName('p')[0].innerText += button;
+            if(console_string.innerText != '0')
+                console_string.innerText += button;
             else
-                document.getElementsByClassName('console')[0].getElementsByTagName('p')[0].innerText = button;
+                console_string.innerText = button;
 
         }
+
+        var right = $('.console>p').width();
+        $('.console>p').scrollLeft(right);
     }
 </script>
 </html>
