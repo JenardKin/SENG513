@@ -1,0 +1,15 @@
+Instructions for my calculator for Assignment 2
+By: Jenard Cabia 10172498
+
+- My calculator is available at this URL: 
+	https://jenardkin.github.io/assignment2/index.html
+
+- Browsers you used to test the assignment:
+	Google Chrome, Mozilla Firefox, Microsoft Edge
+
+
+- Description of how to use calculator:
+	Click on the buttons to input the corresponding numbers or operations to the display.
+	Click the equals button to evaluate the expression.
+	Previous expressions will be printed at the top of the console.
+	Error will be printed if the expression is invalid.
