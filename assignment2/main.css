@@ -59,19 +59,14 @@ td > button{
     margin-right: 10px;
 }
 
+/* For IPADs */
 @media only screen and (max-width: 768px) {
-    /* Styles */
     .calculator{
         max-width: 100%;
-    }
-    .wrapper{
-        height: 100%;
-
     }
 }
 
 @media only screen and (max-width: 1024px) {
-    /* Styles */
     .calculator{
         max-width: 100%;
     }

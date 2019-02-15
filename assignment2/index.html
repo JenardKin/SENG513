@@ -82,9 +82,7 @@
             try {
                 console_string.innerText = eval(console_string.innerText);
             } catch (e) {
-                if (e instanceof SyntaxError) {
-                    console_string.innerText = 0;
-                }
+                console_string.innerText += '=ERROR';               
             }
             equal = true;
             $('.console>p').scrollLeft(0);
