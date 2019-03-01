@@ -1,1 +1,4 @@
+// Use a Procfile, a text file in the root directory of your application, to explicitly declare what command should be executed to start your app.
+
+// This declares a single process type, web
 web: node index.js
