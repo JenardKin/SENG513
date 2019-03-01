@@ -37,3 +37,25 @@ For more information about using Node.js on Heroku, see these Dev Center article
 - [Node.js on Heroku](https://devcenter.heroku.com/categories/nodejs)
 - [Best Practices for Node.js Development](https://devcenter.heroku.com/articles/node-best-practices)
 - [Using WebSockets on Heroku with Node.js](https://devcenter.heroku.com/articles/node-websockets)
+
+
+## Pushing Local Changes
+
+Use NPM Install on a dependency
+
+Make your edits on index.js (requires and stuff)
+
+To test locally:
+    npm install
+
+    heroku local
+
+Then to Push to the heroku remote (you need to push changes both in the source code master and heroku master for hosting it)
+git add.
+
+git commit  -m 'Message'
+
+git subtree push --prefix chat-app-live heroku master
+
+
+
