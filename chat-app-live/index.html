@@ -30,7 +30,7 @@
     <script>
         
         moment().format();
-        var socket = io(); // defaults trying to connect the host that serves the page
+        var socket = io('https://chat-app-live.herokuapp.com/'); // defaults trying to connect the host that serves the page
         $('form').submit(function(e){
             e.preventDefault(); // prevents page reloading
             socket.emit('chat message', $('#m').val());
