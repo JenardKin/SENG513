@@ -20,29 +20,153 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const PORT = process.env.PORT || 3000;
 const moment = require('moment');
+const moment_tz = require('moment-timezone');
 const cool = require('cool-ascii-faces');
+
+const rug = require('random-username-generator');
+const cookieParser = require('cookie-parser');
+
+var chatHistory = []; // store chat history in memory
+
+var chatUsers = []; // to keep track of the current users nickname and their time that they joined the chat
+
 moment().format();
+moment_tz().format();
+
+app.use(cookieParser());
 
 app.get('/', function(req, res){
+  if(!req.cookies.nickname){
+
+    // set a new cookie that will last 1 hr
+    res.cookie("nickname", rug.generate());
+  
+  }
+  
   res.sendFile(__dirname + '/index.html');
 });
 
-app.get('/cool', (req,res) => res.send(cool()))
+app.get('/cool', (req,res) => res.send(cool()));
 
-io.on('connection', function(socket){
-    console.log('a user connected');
-    socket.on('disconnect', function(){
-      console.log('user disconnected');
-    });
-    socket.on('chat message', function(msg){
-        let msg_response = {msg: msg, ts:moment.utc().valueOf()}
-        io.emit('chat message', msg_response);
-    });
+app.get('/changeNickname', (req, res) => {
+  res.cookie('nickname', req.query['nickname']);
+  res.redirect('back');
 });
 
-io.emit('some event', { for: 'everyone' });
+app.get('/changeColor', (req, res) => {
+  res.cookie('hexcolor', req.query['hexcolor']);
+  res.redirect('back');
+});
+
+io.on('connection', function(socket){
+
+  let nickname = read_cookie('nickname', socket.handshake.headers['cookie']);
+
+  console.log('a user connected, nickname:', nickname);
+
+  chatUsers.push(nickname);
+  io.emit('user connect', JSON.stringify(chatUsers));
+
+  // Send the chat history to the user connecting
+  if(chatHistory.length > 0){
+    socket.emit('chat history', JSON.stringify(chatHistory));
+  }
+
+  socket.on('disconnect', function(){
+    nickname = read_cookie('nickname', socket.handshake.headers['cookie']);
+
+    console.log('user disconnected, nickname:', nickname);
+
+    chatUsers = chatUsers.filter(function(user){
+      return user != nickname;
+    });
+
+    io.emit('user connect', JSON.stringify(chatUsers));
+
+  });
+
+  socket.on('chat message', function(msg){
+
+    nickname = read_cookie('nickname', socket.handshake.headers['cookie']);
+    let split = msg.split(/(\S+\s+)/).filter(function(n) {return n});
+
+    if(split[0] === '/nick '){
+      if(split.length != 2){
+        socket.emit('alert', 'Please ensure there are no spaces in the nickname.\n(Format: /nick <new nickname>)');
+      }
+      else{
+        // delete the user
+        chatUsers = chatUsers.filter(function(user){
+          return user != nickname;
+        });
+
+        chatHistory.forEach(function (message, index){
+          if(message['nickname'] == nickname){
+            message['nickname'] = split[1];
+          }
+        });
+
+        // Send the chat history to the user connecting
+        if(chatHistory.length > 0){
+          io.emit('chat history', JSON.stringify(chatHistory));
+        }
+        
+        socket.emit('redirect', '/changeNickname?nickname=' + split[1]);
+      }
+    }
+    else if(split[0] === '/nickcolor '){
+      if(split.length != 2){
+        socket.emit('alert', 'Please ensure you have the correct format to change colors.\n(Format: /nickcolor RRGGBB)');
+      }
+      else if(is_hexadecimal(split[1])){
+        socket.emit('redirect', '/changeColor?hexcolor=' + split[1]);
+      }
+      else{
+        socket.emit('alert', 'Please ensure you input a valid hex color.\n(Format: /nickcolor RRGGBB)');
+      }
+    }
+    else if(msg.substring(0, 1) === '/'){
+      socket.emit('alert', 'Invalid command. Do you mean either:\n /nick <new nickname> or /nickcolor RRGGBB?');
+    }
+    else{
+      let msg_response = {msg: msg, ts: moment.utc().valueOf(), nickname: read_cookie('nickname', socket.handshake.headers['cookie'])}
+      chatHistory.push(msg_response);
+      io.emit('chat message', msg_response);
+    }
+  });
+});
 
 
 http.listen(PORT, function(){
   console.log(`Listening on ${ PORT }`);
 });
+
+// Get the object variable from cookie based on the name
+function read_cookie(name_of_key, cookie) {
+  let cookie_array_key_value = cookie.split('; ');
+  let return_val = null; // return null if not found
+
+  cookie_array_key_value.forEach(function(item, index){
+    let key = item.split('=')[0];
+    let value = item.split('=')[1];
+    if(key == name_of_key){
+      return_val = value;
+    }
+  });
+
+  return return_val;        
+}
+
+function is_hexadecimal(str)
+{
+ regexp = /^[0-9a-fA-F]+$/;
+  
+        if (regexp.test(str))
+          {
+            return true;
+          }
+        else
+          {
+            return false;
+          }
+}

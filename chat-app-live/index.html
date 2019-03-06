@@ -8,9 +8,17 @@
       form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
       form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
       form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #welcome {background: cadetblue; padding-left: 10px;}
       #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
+      #messages li { padding: 5px 10px; word-wrap: break-word;}
       #messages li:nth-child(odd) { background: #eee; }
+      #users { list-style-type: none; margin: 0; padding: 0; }
+      #users li { padding: 5px 10px; word-wrap: break-word;}
+      #users li:nth-child(odd) { background: #eee; }
+      .date { display: flex; }
+      .nickname {padding-left: 20px;}
+      .message{ padding-left: 10px;}
+
     </style>
 
     <!-- Socket.io -->
@@ -20,17 +28,33 @@
 
   </head>
   <body>
-    Birthday
-    <ul id="messages"></ul>
+    <h2 id='welcome'>Welcome to the Live Chat!</h2>
+    <div>
+      <div style="float: left; position: absolute; overflow: auto; height: 92%; width: 80%;">
+        <ul id="messages" ></ul>
+      </div>
+      <div style="float: right; padding-right: 5%; overflow: auto;">
+        <h3>Online Users</h3>
+        <ul id="users"></ul> 
+      </div>
+    </div>
     <form action="">
       <input id="m" autocomplete="off" /><button>Send</button>
     </form>
     <!-- Moment.js-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.23/moment-timezone-with-data.min.js"></script>
     <script>
         
         moment().format();
         var socket = io('https://chat-app-live.herokuapp.com/'); // defaults trying to connect the host that serves the page
+        //var socket = io('http://localhost:5000/'); // defaults trying to connect the host that serves the page
+        let nickname = read_cookie('nickname');
+        let hexcolor = read_cookie('hexcolor');
+        if(nickname){
+          $('#welcome').append(' Your nickname is: ' + nickname);
+        }
+
         $('form').submit(function(e){
             e.preventDefault(); // prevents page reloading
             socket.emit('chat message', $('#m').val());
@@ -38,9 +62,63 @@
             return false;
         });
 
-        socket.on('chat message', function(msg_response){
-            $('#messages').append($('<li>').text(msg_response['msg']+ '     ' +  msg_response['ts']));
+        socket.on('chat history', function(msg_response){
+          let chat_history = JSON.parse(msg_response);
+          let nickname = read_cookie('nickname');
+
+          $('#messages').empty();
+          chat_history.forEach(function(msg, index){
+            $('#messages').append($('<li>').append($('<p class="date">').text(moment(msg['ts']).tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('MM/DD/YYYY hh:mm A z'))
+              .append($('<p class="nickname">').text(msg['nickname'] + ':'), $('<p class="message">').text(msg['msg']))));
+          });
+
+          $("p.nickname:contains(" + nickname + ")").css( "text-decoration", "underline" ).css("color", '#' + hexcolor);
+          $("p.nickname:contains(" + nickname + ")").siblings().css( "font-weight", "bold" );
         });
+
+        socket.on('user connect', function(msg_response){
+          let users_list = JSON.parse(msg_response);
+          $('#users').empty();
+          users_list.forEach(function(username){
+            $('#users').append($('<li>').text(username));
+          });
+        });
+
+        socket.on('chat message', function(msg_response){
+          let nickname = read_cookie('nickname');
+          if(!nickname)
+            nickname = '';
+
+          $('#messages').append($('<li>').append($('<p class="date">').text(moment(msg_response['ts']).tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('MM/DD/YYYY hh:mm A z'))
+              .append($('<p class="nickname">').text(msg_response['nickname'] + ':'), $('<p class="message">').text(msg_response['msg']))));
+
+          $("p.nickname:contains(" + nickname + ")").css( "text-decoration", "underline" ).css("color", '#' + hexcolor);
+          $("p.nickname:contains(" + nickname + ")").siblings().css( "font-weight", "bold" );
+        });
+
+        socket.on('redirect', function(destination){
+          window.location.href = destination;
+        });
+
+        socket.on('alert', function(alert_msg){
+          alert(alert_msg);
+        });
+
+        // Get the object variable from cookie based on the name
+        function read_cookie(name_of_key) {
+          let cookie_array_key_value = document.cookie.split('; ');
+          let return_val = null; // return null if not found
+
+          cookie_array_key_value.forEach(function(item, index){
+            let key = item.split('=')[0];
+            let value = item.split('=')[1];
+            if(key == name_of_key){
+              return_val = value;
+            }
+          });
+
+          return return_val;        
+        }
         
     </script>
   </body>
