@@ -10,6 +10,7 @@
       form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
       #welcome {background: cadetblue; padding-left: 10px;}
       #messages { list-style-type: none; margin: 0; padding: 0; }
+      p.message {overflow: auto;}
       #messages li { padding: 5px 10px; word-wrap: break-word;}
       #messages li:nth-child(odd) { background: #eee; }
       #users { list-style-type: none; margin: 0; padding: 0; }
@@ -30,10 +31,10 @@
   <body>
     <h2 id='welcome'>Welcome to the Live Chat!</h2>
     <div>
-      <div id = 'message_div' style="float: left; position: absolute; overflow: auto; height: 92%; width: 80%;">
+      <div id = 'message_div' style="float: left; position: absolute; overflow-y: auto; height: 92%; width: 80%;">
         <ul id="messages" ></ul>
       </div>
-      <div style="float: right; padding-right: 5%; overflow: auto;">
+      <div style="float: right; padding-right: 5%; overflow-y: auto;">
         <h3>Online Users</h3>
         <ul id="users"></ul> 
       </div>
