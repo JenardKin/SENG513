@@ -30,7 +30,7 @@
   <body>
     <h2 id='welcome'>Welcome to the Live Chat!</h2>
     <div>
-      <div style="float: left; position: absolute; overflow: auto; height: 92%; width: 80%;">
+      <div id = 'message_div' style="float: left; position: absolute; overflow: auto; height: 92%; width: 80%;">
         <ul id="messages" ></ul>
       </div>
       <div style="float: right; padding-right: 5%; overflow: auto;">
@@ -47,10 +47,19 @@
     <script>
         
         moment().format();
-        var socket = io('https://chat-app-live.herokuapp.com/'); // defaults trying to connect the host that serves the page
+        var socket = io(); // defaults trying to connect the host that serves the page
         //var socket = io('http://localhost:5000/'); // defaults trying to connect the host that serves the page
         let nickname = read_cookie('nickname');
         let hexcolor = read_cookie('hexcolor');
+
+        var colors = [], users_list = [];
+
+        socket.on('colors', function(color_array){
+          colors = color_array;
+        })
+
+        
+
         if(nickname){
           $('#welcome').append(' Your nickname is: ' + nickname);
         }
@@ -72,16 +81,29 @@
               .append($('<p class="nickname">').text(msg['nickname'] + ':'), $('<p class="message">').text(msg['msg']))));
           });
 
+          document.getElementById('message_div').scrollTop = document.getElementById('message_div').scrollHeight;
+
           $("p.nickname:contains(" + nickname + ")").css( "text-decoration", "underline" ).css("color", '#' + hexcolor);
           $("p.nickname:contains(" + nickname + ")").siblings().css( "font-weight", "bold" );
+
+          colorNicknames(users_list, colors);
+
         });
 
         socket.on('user connect', function(msg_response){
-          let users_list = JSON.parse(msg_response);
+          users_list = JSON.parse(msg_response);
           $('#users').empty();
-          users_list.forEach(function(username){
-            $('#users').append($('<li>').text(username));
+          users_list.forEach(function(username, index){
+            if(username == read_cookie('nickname') && read_cookie('hexcolor')){
+              $('#users').append($('<li style="color: #' +  read_cookie('hexcolor')  + ' ">').text(username));
+            }
+            else{
+              $('#users').append($('<li>').text(username));
+            }
           });
+
+          colorNicknames(users_list, colors);
+          
         });
 
         socket.on('chat message', function(msg_response){
@@ -92,8 +114,14 @@
           $('#messages').append($('<li>').append($('<p class="date">').text(moment(msg_response['ts']).tz(Intl.DateTimeFormat().resolvedOptions().timeZone).format('MM/DD/YYYY hh:mm A z'))
               .append($('<p class="nickname">').text(msg_response['nickname'] + ':'), $('<p class="message">').text(msg_response['msg']))));
 
+          document.getElementById('message_div').scrollTop = document.getElementById('message_div').scrollHeight;
+          
+
           $("p.nickname:contains(" + nickname + ")").css( "text-decoration", "underline" ).css("color", '#' + hexcolor);
           $("p.nickname:contains(" + nickname + ")").siblings().css( "font-weight", "bold" );
+
+          colorNicknames(users_list, colors);
+
         });
 
         socket.on('redirect', function(destination){
@@ -102,6 +130,10 @@
 
         socket.on('alert', function(alert_msg){
           alert(alert_msg);
+        });
+
+        socket.on('refresh users', function(msg){
+          socket.emit('refresh users', read_cookie('nickname'));
         });
 
         // Get the object variable from cookie based on the name
@@ -118,6 +150,19 @@
           });
 
           return return_val;        
+        }
+
+        function colorNicknames(users_list, colors){
+          users_list.forEach(function(user, index){
+            if(user != read_cookie('nickname')){
+              $("p.nickname:contains(" + user + ")").css("color", colors[index]);
+              $('#users>li:contains(' + user  +')').css("color", colors[index]);
+            }
+            else if(!read_cookie('hexcolor')){
+              $("p.nickname:contains(" + user + ")").css("color", colors[index]);
+              $('#users>li:contains(' + user  +')').css("color", colors[index]);
+            }
+          });
         }
         
     </script>

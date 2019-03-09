@@ -26,6 +26,14 @@ const cool = require('cool-ascii-faces');
 const rug = require('random-username-generator');
 const cookieParser = require('cookie-parser');
 
+var colors = [];
+
+  for(let i = 0; i < 500; i++){
+    let c = getRandomColor();
+    if(!colors.includes(c))
+      colors.push(c);
+  }
+
 var chatHistory = []; // store chat history in memory
 
 var chatUsers = []; // to keep track of the current users nickname and their time that they joined the chat
@@ -62,9 +70,21 @@ io.on('connection', function(socket){
 
   let nickname = read_cookie('nickname', socket.handshake.headers['cookie']);
 
-  console.log('a user connected, nickname:', nickname);
+  let userAlreadyConnected = false;
+  chatUsers.forEach(function(user){
+    if(user == nickname){
+      userAlreadyConnected = true;      
+    }
+  })
 
-  chatUsers.push(nickname);
+  socket.emit('colors', colors)
+
+  if(userAlreadyConnected)
+    console.log('user:', nickname, ' already has logged in.');
+  else{
+    console.log('a user connected, nickname:', nickname);
+    chatUsers.push(nickname);
+  }
   io.emit('user connect', JSON.stringify(chatUsers));
 
   // Send the chat history to the user connecting
@@ -82,6 +102,8 @@ io.on('connection', function(socket){
     });
 
     io.emit('user connect', JSON.stringify(chatUsers));
+
+    io.emit('refresh users', "");
 
   });
 
@@ -134,6 +156,14 @@ io.on('connection', function(socket){
       io.emit('chat message', msg_response);
     }
   });
+
+  socket.on('refresh users', function(nickname){
+    if(!chatUsers.includes(nickname)){
+      chatUsers.push(nickname);
+      io.emit('user connect', JSON.stringify(chatUsers));
+    }
+  });
+
 });
 
 
@@ -143,8 +173,12 @@ http.listen(PORT, function(){
 
 // Get the object variable from cookie based on the name
 function read_cookie(name_of_key, cookie) {
+
+  if(typeof(cookie) == 'undefined')
+    return '';
+  
   let cookie_array_key_value = cookie.split('; ');
-  let return_val = null; // return null if not found
+  let return_val = ''; // return null if not found
 
   cookie_array_key_value.forEach(function(item, index){
     let key = item.split('=')[0];
@@ -169,4 +203,14 @@ function is_hexadecimal(str)
           {
             return false;
           }
+}
+
+// Random HexColor generator
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
 }
